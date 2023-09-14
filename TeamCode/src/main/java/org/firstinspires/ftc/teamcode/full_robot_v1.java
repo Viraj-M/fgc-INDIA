@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -16,6 +17,8 @@ public class full_robot_v1 extends OpMode {
     DcMotorEx lh;
     DcMotorEx rh;
     DcMotorEx ching_chong;
+    DcMotorEx ching_chong2;
+
     TouchSensor lsms;
     TouchSensor rsms;
 
@@ -32,7 +35,6 @@ public class full_robot_v1 extends OpMode {
     private int lfp;
     private double spr = 1;
     private double spl = 0;
-    private boolean single_control = false;
 
     private double speed = 1;
 
@@ -49,6 +51,7 @@ public class full_robot_v1 extends OpMode {
         lsms = hardwareMap.get(TouchSensor.class, "ls_ms");
         rsms = hardwareMap.get(TouchSensor.class, "rs_ms");
         ching_chong = hardwareMap.get(DcMotorEx.class, "chingchong");
+        ching_chong2 = hardwareMap.get(DcMotorEx.class, "chingchong2");
         rm.setDirection(DcMotorEx.Direction.REVERSE);
         ching_chong.setDirection(DcMotorEx.Direction.REVERSE);
         rm.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -56,6 +59,9 @@ public class full_robot_v1 extends OpMode {
         rs.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         ls.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         ching_chong.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        ching_chong2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        ching_chong.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ching_chong2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lf = hardwareMap.get(Servo.class, "lf");
         rf = hardwareMap.get(Servo.class, "rf");
         lsweep = hardwareMap.get(Servo.class, "lsweep");
@@ -66,8 +72,6 @@ public class full_robot_v1 extends OpMode {
         rf.scaleRange(0.2, 0.8);
         rsweep.scaleRange(0, 0.45);
         lsweep.scaleRange(0, 0.5);
-        rsweep.setPosition(1);
-        lsweep.setPosition(0);
     }
 
     @Override
@@ -77,8 +81,6 @@ public class full_robot_v1 extends OpMode {
         float g1rt = gamepad1.right_trigger;
         float g1lt = gamepad1.left_trigger;
         float g2rt = gamepad2.right_trigger;
-        //horizontal movement
-        float x = gamepad1.left_stick_x;
         //double slider
         float ps = gamepad2.right_stick_y;
         //single left slider
@@ -89,11 +91,19 @@ public class full_robot_v1 extends OpMode {
         float ph = gamepad1.right_stick_y;
         //straight movement
         float y = g1rt - g1lt;
-        single_control = g2rt != 0;
-        float ching_chong_power = gamepad2.left_stick_y;
+        boolean single_control = g2rt != 0;
+        double ching_chong_velocity = gamepad2.left_stick_y * 1820;
         //acceleration factor
-        double af = 1.1 + y/10;
-        //elocity
+        double af = 1.02;
+        //horixontal-axis
+        double x;
+        //Sharp turn fix
+        if(y != 0){
+            x = gamepad1.left_stick_x/1.3;
+        } else {
+            x = gamepad1.left_stick_x;
+        }
+        //Velocity
         vel = vel + ((y - vel) / af);
         //robot speed
         if(gamepad1.triangle){
@@ -104,26 +114,32 @@ public class full_robot_v1 extends OpMode {
         } else if (gamepad1.dpad_down && speed > 0.3){
             speed = speed - 0.15;
         }
-        double lmp = (vel + x) * speed;
+        double lmp = ((vel + x) * speed) * 0.87;
         double rmp = (vel - x) * speed;
 
         //Robot control
         if (gamepad1.left_bumper){
-
+            lm.setPower(0);
+            rm.setPower(0);
         } else {
             lm.setPower(lmp);
             rm.setPower(rmp);
         }
         //Intake control
         if(!single_control) {
-            ching_chong.setPower(ching_chong_power);
+                ching_chong.setVelocity(ching_chong_velocity);
+                ching_chong2.setVelocity(ching_chong_velocity);
         } else {
             if(gamepad2.cross){
-                ching_chong.setPower(1);
+                ching_chong.setPower(0.65);
+                ching_chong2.setPower(0.65);
             } else {
                 ching_chong.setPower(0);
+                ching_chong2.setPower(0);
             }
         }
+
+
 
         //Flap control
         if (gamepad2.square){
@@ -213,6 +229,8 @@ public class full_robot_v1 extends OpMode {
         telemetry.addData("af: ", af);
         telemetry.addData("lh: ", lh.getPower());
         telemetry.addData("rh: ", rh.getPower());
+        telemetry.addData("lsms is connected: ", lsms.getConnectionInfo());
+        telemetry.addData("rsms is connected: ", rsms.getConnectionInfo());
         telemetry.addData("lsms: ", lsms.isPressed());
         telemetry.addData("rsms: ", rsms.isPressed());
         telemetry.addData("rf: ", rfp);
@@ -221,6 +239,10 @@ public class full_robot_v1 extends OpMode {
         telemetry.addData("spl: ", spl);
         telemetry.addData("speed factor: ", speed);
         telemetry.addData("single_control: ", single_control);
+        telemetry.addData("ching_chong1 power: ", ching_chong.getPower());
+        telemetry.addData("ching_chong2 power: ", ching_chong2.getPower());
         telemetry.update();
+
+
     }
 }
