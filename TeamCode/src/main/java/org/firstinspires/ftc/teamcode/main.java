@@ -51,8 +51,7 @@ public class main extends OpMode {
             lm.setPower(x);
             rm.setPower(-x * 0.96);
         }
-        if(lm.getPower() != 0 || rm.getPower() != 0){
-            if (times_executed != -1){
+        if(lm.getPower() != 0 || rm.getPower() != 0 && times_executed != -1){
                 if(times_executed == 0){
                     start_time = time.time(TimeUnit.MILLISECONDS);
                     telemetry.addData("The time has started-", start_time);
@@ -79,7 +78,7 @@ public class main extends OpMode {
                     telemetry.update();
                 }
             }
-        } else if (lm.getPower() == 0 && rm.getPower() == 0 && times_executed != -1 && times_executed != 0) {
+        else if (lm.getPower() == 0 && rm.getPower() == 0 && times_executed != -1 && times_executed != 0) {
             times_executed = -1;
             long final_time = time.time(TimeUnit.MILLISECONDS) - start_time;
             telemetry.addData("Elapsed:-", final_time);

@@ -28,13 +28,13 @@ public class full_robot_v1 extends OpMode {
     private Servo rsweep;
     private Servo lhh;
     private Servo rhh;
-    boolean lx = false;
-    boolean rx = false;
     private double vel = 0;
     private int rfp;
     private int lfp;
     private double spr = 1;
     private double spl = 0;
+
+    private double hh = 0;
 
     private double speed = 1;
 
@@ -72,6 +72,14 @@ public class full_robot_v1 extends OpMode {
         rf.scaleRange(0.2, 0.8);
         rsweep.scaleRange(0, 0.45);
         lsweep.scaleRange(0, 0.5);
+        lhh.scaleRange(0, 0.59);
+        rhh.scaleRange(0, 0.61);
+        lf.setPosition(0);
+        rf.setPosition(0);
+        lsweep.setPosition(0);
+        rsweep.setPosition(0);
+        lhh.setPosition(0);
+        rhh.setPosition(0);
     }
 
     @Override
@@ -106,7 +114,7 @@ public class full_robot_v1 extends OpMode {
         //Velocity
         vel = vel + ((y - vel) / af);
         //robot speed
-        if(gamepad1.triangle){
+        if(gamepad1.right_bumper){
             speed = 1;
         }
         if (gamepad1.dpad_up && speed < 1){
@@ -114,7 +122,7 @@ public class full_robot_v1 extends OpMode {
         } else if (gamepad1.dpad_down && speed > 0.3){
             speed = speed - 0.15;
         }
-        double lmp = ((vel + x) * speed) * 0.87;
+        double lmp = ((vel + x) * speed) * 0.95;
         double rmp = (vel - x) * speed;
 
         //Robot control
@@ -147,16 +155,16 @@ public class full_robot_v1 extends OpMode {
             lfp = 0;
         }
         if (gamepad2.circle){
-            rf.setPosition(0);
-            rfp = 0;
-        }
-        if (gamepad2.dpad_left){
             lf.setPosition(0);
             lfp = 1;
         }
-        if (gamepad2.dpad_right){
+        if (gamepad2.dpad_left){
             rf.setPosition(1);
             rfp = 1;
+        }
+        if (gamepad2.dpad_right){
+            rf.setPosition(0);
+            rfp = 0;
         }
 
         //Sweep control
@@ -172,6 +180,15 @@ public class full_robot_v1 extends OpMode {
         }
         rsweep.setPosition(spr);
         lsweep.setPosition(spl);
+
+        //Hydrogen Hooks
+        if(gamepad1.triangle){
+            lhh.setPosition(1);
+            rhh.setPosition(1);
+        } else if (gamepad1.cross) {
+            lhh.setPosition(0);
+            rhh.setPosition(0);
+        }
 
         //Slider control
 
