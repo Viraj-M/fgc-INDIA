@@ -24,8 +24,8 @@ public class full_robot_v1 extends OpMode {
 
     private Servo lf;
     private Servo rf;
-    private Servo lsweep;
-    private Servo rsweep;
+//    private Servo lsweep;
+//    private Servo rsweep;
     private Servo lhh;
     private Servo rhh;
     private double vel = 0;
@@ -53,7 +53,7 @@ public class full_robot_v1 extends OpMode {
         ching_chong = hardwareMap.get(DcMotorEx.class, "chingchong");
         ching_chong2 = hardwareMap.get(DcMotorEx.class, "chingchong2");
         rm.setDirection(DcMotorEx.Direction.REVERSE);
-        ching_chong.setDirection(DcMotorEx.Direction.REVERSE);
+//        ching_chong.setDirection(DcMotorEx.Direction.REVERSE);
         rm.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         lm.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         rs.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -64,20 +64,20 @@ public class full_robot_v1 extends OpMode {
         ching_chong2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lf = hardwareMap.get(Servo.class, "lf");
         rf = hardwareMap.get(Servo.class, "rf");
-        lsweep = hardwareMap.get(Servo.class, "lsweep");
-        rsweep = hardwareMap.get(Servo.class, "rsweep");
+//        lsweep = hardwareMap.get(Servo.class, "lsweep");
+//        rsweep = hardwareMap.get(Servo.class, "rsweep");
         lhh = hardwareMap.get(Servo.class, "lhh");
         rhh = hardwareMap.get(Servo.class, "rhh");
         lf.scaleRange(0.4, 1);
         rf.scaleRange(0.2, 0.8);
-        rsweep.scaleRange(0, 0.45);
-        lsweep.scaleRange(0, 0.5);
+//        rsweep.scaleRange(0, 0.45);
+//        lsweep.scaleRange(0, 0.5);
         lhh.scaleRange(0, 0.59);
         rhh.scaleRange(0, 0.61);
         lf.setPosition(0);
         rf.setPosition(0);
-        lsweep.setPosition(0);
-        rsweep.setPosition(0);
+//        lsweep.setPosition(0);
+//        rsweep.setPosition(0);
         lhh.setPosition(0);
         rhh.setPosition(0);
     }
@@ -122,16 +122,21 @@ public class full_robot_v1 extends OpMode {
         } else if (gamepad1.dpad_down && speed > 0.3){
             speed = speed - 0.15;
         }
-        double lmp = ((vel + x) * speed) * 0.95;
-        double rmp = (vel - x) * speed;
+        double lmp = ((vel + x) * speed);
+        double rmp = ((vel - x) * speed);
 
         //Robot control
         if (gamepad1.left_bumper){
             lm.setPower(0);
             rm.setPower(0);
         } else {
-            lm.setPower(lmp);
-            rm.setPower(rmp);
+            if (y < 0) {
+                lm.setPower(lmp);
+                rm.setPower(rmp  * 0.95);
+            } else {
+                lm.setPower(lmp);
+                rm.setPower(rmp  * 0.9);
+            }
         }
         //Intake control
         if(!single_control) {
@@ -168,23 +173,26 @@ public class full_robot_v1 extends OpMode {
         }
 
         //Sweep control
-        if (gamepad1.square && spr < 1) {
-            spr += 0.15;
-        } else if (gamepad1.circle && spr > 0) {
-            spr += -0.15;
-        }
-        if (gamepad1.dpad_right && spl > 0) {
-            spl += -0.15;
-        } else if (gamepad1.dpad_left && spl < 1) {
-            spl += 0.15;
-        }
-        rsweep.setPosition(spr);
-        lsweep.setPosition(spl);
+//        if (gamepad1.square && spr < 1) {
+//            spr += 0.15;
+//        } else if (gamepad1.circle && spr > 0) {
+//            spr += -0.15;
+//        }
+//        if (gamepad1.dpad_right && spl > 0) {
+//            spl += -0.15;
+//        } else if (gamepad1.dpad_left && spl < 1) {
+//            spl += 0.15;
+//        }
+//        rsweep.setPosition(spr);
+//        lsweep.setPosition(spl);
 
         //Hydrogen Hooks
         if(gamepad1.triangle){
             lhh.setPosition(1);
             rhh.setPosition(1);
+        } else if (gamepad1.circle) {
+            lhh.setPosition(0.65);
+            rhh.setPosition(0.65);
         } else if (gamepad1.cross) {
             lhh.setPosition(0);
             rhh.setPosition(0);
@@ -198,16 +206,24 @@ public class full_robot_v1 extends OpMode {
 
         if (single_control){
             if (!lsms.isPressed()){
-                ls.setPower(psl * 0.5);
+                if (psl > 0){
+                    ls.setPower(psl * 0.25);
+                } else {
+                    ls.setPower(psl * 0.5);
+                }
             } else {
                 if (psl > 0){
-                    ls.setPower(psl * 0.5);
+                    ls.setPower(psl * 0.25);
                 } else {
                     ls.setPower(0);
                 }
             }
             if (!rsms.isPressed()){
-                rs.setPower(psr * 0.5);
+                if (psl > 0){
+                    rs.setPower(psr * 0.25);
+                } else {
+                    rs.setPower(psr * 0.5);
+                }
             } else {
                 if (psr > 0){
                     rs.setPower(psr * 0.5);
@@ -217,19 +233,27 @@ public class full_robot_v1 extends OpMode {
             }
         } else {
             if (!lsms.isPressed()){
-                ls.setPower(ps * 0.5);
+                if (ps > 0){
+                    ls.setPower(ps * 0.25);
+                } else {
+                    ls.setPower(ps * 0.5);
+                }
             } else {
                 if (ps > 0){
-                    ls.setPower(ps * 0.5);
+                    ls.setPower(ps * 0.25);
                 } else {
                     ls.setPower(0);
                 }
             }
             if (!rsms.isPressed()){
-                rs.setPower(ps * 0.5);
+                if (ps > 0){
+                    rs.setPower(ps * 0.25);
+                } else {
+                    rs.setPower(ps * 0.5);
+                }
             } else {
                 if (ps > 0){
-                    rs.setPower(ps * 0.5);
+                    rs.setPower(ps * 0.25);
                 } else {
                     rs.setPower(0);
                 }
@@ -239,25 +263,22 @@ public class full_robot_v1 extends OpMode {
         //Hooking control
         lh.setPower(ph);
         rh.setPower(ph);
-
         telemetry.addData("Velocity: ", vel);
         telemetry.addData("lmp: ", lmp);
         telemetry.addData("rmp: ", rmp);
         telemetry.addData("af: ", af);
+        telemetry.addData("speed factor: ", speed);
         telemetry.addData("lh: ", lh.getPower());
         telemetry.addData("rh: ", rh.getPower());
-        telemetry.addData("lsms is connected: ", lsms.getConnectionInfo());
-        telemetry.addData("rsms is connected: ", rsms.getConnectionInfo());
         telemetry.addData("lsms: ", lsms.isPressed());
         telemetry.addData("rsms: ", rsms.isPressed());
+        telemetry.addData("single_control: ", single_control);
+        telemetry.addData("ching_chong1 velocity: ", ching_chong.getVelocity());
+        telemetry.addData("ching_chong2 velocity: ", ching_chong2.getVelocity());
         telemetry.addData("rf: ", rfp);
         telemetry.addData("lf: ", lfp);
         telemetry.addData("spr: ", spr);
         telemetry.addData("spl: ", spl);
-        telemetry.addData("speed factor: ", speed);
-        telemetry.addData("single_control: ", single_control);
-        telemetry.addData("ching_chong1 power: ", ching_chong.getPower());
-        telemetry.addData("ching_chong2 power: ", ching_chong2.getPower());
         telemetry.update();
 
 
